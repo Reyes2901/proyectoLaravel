@@ -20,4 +20,11 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+//Route::get('/usuarios-graficadores', [GraficadorController::class, 'listarUsuariosGraficadores'])->name('usuarios.graficadores');
+
+Route::get('/usuarios-graficadores/{idGraficador}/usuarios', [GraficadorController::class, 'listarUsuariosPorGraficador'])->name('graficador.usuarios');
+
+Route::post('/graficadorusuario/{idGraficador}/{id}/cambiar-estado', [GraficadorController::class, 'cambiarEstado'])
+    ->name('graficadorusuario.cambiarEstado');
+
 require __DIR__.'/auth.php';
