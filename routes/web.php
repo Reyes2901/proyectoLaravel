@@ -20,4 +20,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+// Ruta para listar todas las gráficas
+Route::get('/graficadores/lista', [GraficadorController::class, 'listatodaslasgraficas']);
+// Ruta para añadir colaborador
+Route::post('/graficador/colaborador', [GraficadorController::class, 'addCollaborator']);
+
 require __DIR__.'/auth.php';
