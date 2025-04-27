@@ -55,161 +55,245 @@
     }
 
     </style>
+     <link href="https://unpkg.com/grapesjs/dist/css/grapes.min.css" rel="stylesheet">
    
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900 dark:text-gray-100" style="    height: 1500px;" >
                     <h3 class="text-xl font-semibold mb-4" >PORTAL GRAFICADOR </h3>
-
-
-                       <!-- Contenedor para el Editor.js -->
-<div id="editorjs"></div>
-
-<!-- Botón para guardar el contenido -->
-<button onclick="saveData()">Guardar contenido</button>
-
-
-<button id="btnTransmit">Transmitir</button>
-
-<h3>Log de WebSocket</h3>
-<textarea id="log" readonly></textarea>
-<!-- Cargar Editor.js -->
-
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div id="blocks" style=" top:0; left:0;  background:#f5f5f5; overflow:auto;"></div>
+                            <div class="panel__top" style="margin-bottom: 10px;"></div> <!-- 👈 AQUI -->
+                            <div id="gjs" style="height:100vh; border:1px solid #ccc;"></div>
+                        </div>
+                        
+                    </div>
                    
                 </div>
             </div>
         </div>
     </div>
-<!-- Instalación rápida en tu web -->
 
-<script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest"></script>
+<!-- Cargar la librería cliente de socket.io -->
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 
-<script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
-
-
-<!-- Plugins de Editor.js -->
-<script src="https://cdn.jsdelivr.net/npm/@editorjs/header@latest"></script>
-<script src="https://cdn.jsdelivr.net/npm/@editorjs/list@latest"></script>
-<script src="https://cdn.jsdelivr.net/npm/@editorjs/paragraph@latest"></script>
+<script src="https://unpkg.com/grapesjs"></script>
+<script src="https://unpkg.com/grapesjs-blocks-basic"></script>
 
 <script>
-  // Inicializar Editor.js
 
-  const editor = new EditorJS({
-    /** ID del contenedor */
-    holder: 'editorjs',
-    /** Herramientas disponibles */
-    tools: {
-      header: {
-        class: Header,
-        inlineToolbar: true
-      },
-      
-      paragraph: {
-        class: Paragraph,
-        inlineToolbar: true
-      }
-    },
-    /** Datos iniciales */
-    data: {
-      blocks: [
+const editor = grapesjs.init({
+    container: '#gjs',
+    fromElement: true,
+    height: '100vh',
+    width: 'auto',
+    storageManager: false, // Para que no guarde en localstorage automáticamente
+
+    // Activamos los paneles básicos
+    panels: {
+      defaults: [
         {
-          type: "header",
-          data: {
-            text: "Bienvenido a Editor.js",
-            level: 2
-          }
+          id: 'panel-top',
+          el: '.panel__top',
+          buttons: [
+            {
+              id: 'visibility',
+              active: true, // Hacerlo activo por defecto
+              label: '<u>Mostrar</u>',
+              command: 'sw-visibility', // Mostrar/ocultar componentes
+            },
+            {
+              id: 'export',
+              className: 'btn-open-export',
+              label: 'Exportar',
+              command: 'export-template',
+              context: 'export-template',
+            },
+            {
+              id: 'undo',
+              className: 'btn-undo',
+              label: 'Deshacer',
+              command: 'core:undo',
+            },
+            {
+              id: 'redo',
+              className: 'btn-redo',
+              label: 'Rehacer',
+              command: 'core:redo',
+            },
+          ],
         },
-        {
-          type: "paragraph",
-          data: {
-            text: "Este es un ejemplo sencillo para probar Editor.js"
-          }
-        }
-      ]
-    }
+      ],
+    },
+
+    blockManager: {
+  appendTo: '#blocks', // a dónde mandar los bloques
+  blocks: [
+    {
+      id: 'section', // id único
+      label: '<b>Sección</b>',
+      attributes: { class: 'gjs-block-section' },
+      content: `<section><h1>Hola Mundo</h1><p>Texto de prueba.</p></section>`,
+    },
+    {
+      id: 'text',
+      label: 'Texto',
+      content: '<div data-gjs-type="text">Insertar texto aquí</div>',
+    },
+    {
+      id: 'image',
+      label: 'Imagen',
+      select: true,
+      content: { type: 'image' },
+      activate: true,
+    },
+    // Añadir más bloques aquí
+    {
+      id: 'button', // Nuevo bloque de botón
+      label: 'Botón',
+      content: `<button class="btn btn-primary">Haz clic aquí</button>`,
+    },
+    {
+      id: 'card', // Nuevo bloque de tarjeta
+      label: 'Tarjeta',
+      content: `
+        <div class="card" style="width: 18rem;">
+          <img src="https://via.placeholder.com/150" class="card-img-top" alt="Imagen de tarjeta">
+          <div class="card-body">
+            <h5 class="card-title">Título de tarjeta</h5>
+            <p class="card-text">Texto de ejemplo para la tarjeta.</p>
+            <a href="#" class="btn btn-primary">Ir a algún lado</a>
+          </div>
+        </div>
+      `,
+    },
+    {
+      id: 'video', // Nuevo bloque de video
+      label: 'Video',
+      content: `<div class="embed-responsive embed-responsive-16by9">
+                  <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                </div>`,
+    },
+    {
+      id: 'form', // Nuevo bloque de formulario
+      label: 'Formulario',
+      content: `<form>
+                  <div class="form-group">
+                    <label for="name">Nombre</label>
+                    <input type="text" class="form-control" id="name" placeholder="Tu nombre">
+                  </div>
+                  <div class="form-group">
+                    <label for="email">Correo electrónico</label>
+                    <input type="email" class="form-control" id="email" placeholder="Tu correo">
+                  </div>
+                  <button type="submit" class="btn btn-primary">Enviar</button>
+                </form>`,
+    },
+  ],
+}
+
+
+   
   });
 
-  /** Función para guardar el contenido */
-  function saveData() {
-    editor.save().then((outputData) => {
-      console.log("Contenido guardado: ", outputData);
-      alert("¡Contenido guardado en consola!");
-      // Aquí puedes procesar el JSON y convertirlo a HTML
-      exportToHTML(outputData);
-     // socket.send(JSON.stringify({ type: 'editor-update', blocks: outputData.blocks }));
-      
-      
-    }).catch((error) => {
-      console.log('Error al guardar: ', error);
+
+  // Activar el evento del botón de exportar
+editor.Panels.addButton('options', [{
+  id: 'export',
+  className: 'btn-open-export',
+  label: 'Exportar',
+  command: 'export-template',
+  context: 'export-template',
+}]);
+
+
+
+    // Comando para exportar los archivos de Angular
+  
+
+
+
+
+
+   // Conectarse al servidor WebSocket
+   const socket = io('http://localhost:3000', {
+        transports: ['websocket'],
     });
+
+    socket.on('connect', () => {
+        console.log('Conectado al servidor WebSocket');
+    });
+
+    // Escuchar mensajes desde el servidor
+    socket.on('mensaje', (data) => {
+        console.log('Mensaje del servidor:', data);
+
+    });
+    let isUpdating = false;
+
+// Emite un cambio cada vez que se agrega un nuevo componente
+editor.on('component:add', (component) => {
+  if (!isUpdating) {
+    console.log('Nuevo componente agregado:', component);
+    socket.emit('graph-update', { data: component.toJSON() });  // Enviar datos del componente
+  }
+});
+
+// Emite un cambio cada vez que se agrega un nuevo componente
+editor.on('component:add', (component) => {
+  console.log('Nuevo componente agregado:', component);
+  
+  // Obtener toda la estructura del gráfico
+  
+  if (!isUpdating) {
+    console.log('Nuevo componente agregado:', component);
+    const fullData = editor.getComponents();  // Obtener todos los componentes del editor
+
+// Emitir el gráfico completo al servidor para que se envíe a otros clientes
+socket.emit('graph-update', { data: fullData });
   }
 
-  // Función para exportar JSON a HTML
-  function exportToHTML(data) {
-    let htmlContent = '';
-    data.blocks.forEach(block => {
-      if (block.type === 'header') {
-        htmlContent += `<h${block.data.level}>${block.data.text}</h${block.data.level}>`;
-      } else if (block.type === 'paragraph') {
-        htmlContent += `<p>${block.data.text}</p>`;
-      } else if (block.type === 'list') {
-        htmlContent += `<ul>`;
-        block.data.items.forEach(item => {
-          htmlContent += `<li>${item}</li>`;
-        });
-        htmlContent += `</ul>`;
-      }
-    });
-    // Aquí se muestra el HTML generado (puedes enviarlo a algún lugar o procesarlo más)
-    console.log("HTML Exportado: ", htmlContent);
+});
+
+
+
+// Emite un cambio cada vez que se actualiza un componente
+editor.on('component:update', (model) => {
+  if (!isUpdating) {
+    const fullData = editor.getComponents();  // Obtener todos los componentes del editor
+
+// Emitir el gráfico completo al servidor para que se envíe a otros clientes
+socket.emit('graph-update', { data: fullData });
   }
+});
 
-     // Conectar con el servidor WebSocket
-  //const socket = io('http://localhost:8091');
-  //const socket = new WebSocket('wss://localhost:8091');
+// Si el diseño del gráfico cambia, también puedes emitir un evento
+editor.on('storage:update', (data) => {
+  if (!isUpdating) {
+    console.log('Diseño actualizado:', data);
+    socket.emit('graph-update', { data: data });  // Enviar datos del gráfico completo
+  }
+});
 
-  // Conéctate a tu propio servidor en ws://
-  //const socket = new WebSocket('ws://localhost:8091');
-   // 2) Conecta al servidor WebSocket Node
-   const WS_URL = 'ws://localhost:8091'; // ajusta al host/puerto de tu servidor
-    const socket = new WebSocket(WS_URL);
+// Escuchar las actualizaciones del gráfico desde el servidor WebSocket
+socket.on('graph-update', (data) => {
+  console.log('Recibiendo actualización del gráfico de otro cliente:', data);
 
-    const log = document.getElementById('log');
-    function writeLog(msg){
-      log.value += msg + "\n";
-      log.scrollTop = log.scrollHeight;
-    }
+  // Evitar que se emita un cambio cuando estamos recibiendo una actualización de otro cliente
+  isUpdating = true;
+  editor.setComponents(data.data);  // Ajusta esto si tu estructura de datos es diferente
+  isUpdating = false;  // Restablecer la bandera después de actualizar
+});
 
-    socket.onopen = () => writeLog(`✔️ Conectado a ${WS_URL}`);
-    socket.onerror = e => writeLog(`⚠️ Error WS: ${e.message || e}`);
-    socket.onclose = () => writeLog('❌ Desconectado del servidor');
-
-    // 3) Al recibir mensaje (asumimos JSON con { blocks: [...] })
-    socket.onmessage = async (ev) => {
-      writeLog('📨 Recibido del servidor: ' + ev.data);
-      console.log("recvibido", ev.data)
-      try {
-        //const msg = JSON.parse(ev.data);
-   /*     if (msg.blocks) {
-          await editor.isReady;
-          editor.blocks.clear();
-          editor.blocks.render(msg.blocks);
-        }*/
-      } catch (err) {
-        console.error('No es JSON válido:', err);
-      }
-    };
-
-    // 4) Transmitir al servidor
-    document.getElementById('btnTransmit').onclick = async () => {
-      const out = await editor.save();
-      const payload = JSON.stringify({ blocks: out.blocks });
-      socket.send("mensja e para todos ");
-      writeLog('📤 Enviado al servidor: ' + payload);
-    };
+   
 
     </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.8.0/jszip.min.js"></script>
+
+    <!-- En tu archivo Blade -->
+<script src="{{ asset('exportcomponenteangular.js') }}"></script>
+
 
 </x-app-layout>
