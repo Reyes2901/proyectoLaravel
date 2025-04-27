@@ -16,6 +16,11 @@
                         {{ __('Dashboard') }}
                     </x-nav-link>
                 </div>
+             
+                <x-nav-link :href="route('graficadores.index')" :active="request()->routeIs('graficadores.index')">
+                    CRUD graficador
+                </x-nav-link>
+
             </div>
 
             <!-- Settings Dropdown -->
