@@ -26,5 +26,11 @@ Route::get('/usuarios-graficadores/{idGraficador}/usuarios', [GraficadorControll
 
 Route::post('/graficadorusuario/{idGraficador}/{id}/cambiar-estado', [GraficadorController::class, 'cambiarEstado'])
     ->name('graficadorusuario.cambiarEstado');
+// Ruta para listar todas las gráficas
+Route::get('/graficadores/lista', [GraficadorController::class, 'listatodaslasgraficas']);
+// Ruta para añadir colaborador
+Route::post('/graficador/colaborador', [GraficadorController::class, 'addCollaborator']);
+Route::get('/graficador/portal', [GraficadorController::class, 'PortalGraficador']);
+
 
 require __DIR__.'/auth.php';
