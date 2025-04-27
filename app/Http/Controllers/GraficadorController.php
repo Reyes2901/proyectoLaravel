@@ -114,4 +114,14 @@ class GraficadorController extends Controller
         // Responder con un JSON
         return response()->json(['success' => $result]);
     }
+  // Método que lista todas las gráficas
+  public function PortalGraficador()
+  {
+     
+
+      // Pasar los datos a la vista
+      return view('graficadores.portalgraficador');
+  }
+
+
 }
