@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\GraficadorController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -16,5 +17,10 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+// Ruta para listar todas las gráficas
+Route::get('/graficadores/lista', [GraficadorController::class, 'listatodaslasgraficas']);
+// Ruta para añadir colaborador
+Route::post('/graficador/colaborador', [GraficadorController::class, 'addCollaborator']);
 
 require __DIR__.'/auth.php';
