@@ -6,44 +6,48 @@
         </h2>
     </x-slot>
 
-    <div class="py-6">
+    <div class="py-12">
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
-                
-                <form action="{{ route('graficadores.update', $graficador->IdGraficador) }}" method="POST" class="space-y-6">
-                    @csrf
-                    @method('PUT')
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 text-gray-900 dark:text-gray-100">
+                    
+                    <h3 class="text-2xl font-semibold mb-6 text-pink-500">Editar Graficador</h3>
 
-                    <!-- Campo Titulo -->
-                    <div>
-                        <label for="titulo" class="block text-gray-700 dark:text-gray-300 font-bold mb-2">Título:</label>
-                        <input type="text" name="Titulo" id="titulo" value="{{ old('Titulo', $graficador->Titulo) }}" required
-                            class="w-full border rounded px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                    </div>
+                    <form action="{{ route('graficadores.update', $graficador->IdGraficador) }}" method="POST" class="space-y-6">
+                        @csrf
+                        @method('PUT')
 
-                    <!-- Campo Descripcion -->
-                    <div>
-                        <label for="descripcion" class="block text-gray-700 dark:text-gray-300 font-bold mb-2">Descripción:</label>
-                        <textarea name="Descripcion" id="descripcion" required
-                            class="w-full border rounded px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white">{{ old('Descripcion', $graficador->Descripcion) }}</textarea>
-                    </div>
+                        <!-- Campo Título -->
+                        <div>
+                            <label for="Titulo" class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Título</label>
+                            <input type="text" name="Titulo" id="Titulo" value="{{ old('Titulo', $graficador->Titulo) }}" required
+                                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-pink-400 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        </div>
 
-                    <!-- Botones -->
-                    <div class="flex gap-4">
-                        <button type="submit" 
-                            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                            Actualizar
-                        </button>
+                        <!-- Campo Descripción -->
+                        <div>
+                            <label for="Descripcion" class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Descripción</label>
+                            <textarea name="Descripcion" id="Descripcion" rows="4" required
+                                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-pink-400 dark:bg-gray-700 dark:border-gray-600 dark:text-white">{{ old('Descripcion', $graficador->Descripcion) }}</textarea>
+                        </div>
 
-                        <a href="{{ route('graficadores.index') }}" 
-                            class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
-                            Volver al listado
-                        </a>
-                    </div>
+                        <!-- Botones -->
+                        <div class="flex items-center justify-between">
+                            <button type="submit"
+                                class="px-6 py-2 text-white bg-pink-500 hover:bg-pink-600 rounded-lg shadow-md">
+                                Actualizar
+                            </button>
+                            <a href="{{ route('graficadores.index') }}"
+                                class="px-6 py-2 bg-purple-500 text-white rounded-lg shadow-md hover:bg-purple-600">
+                                Volver al Listado
+                            </a>
+                        </div>
 
-                </form>
+                    </form>
 
+                </div>
             </div>
         </div>
     </div>
 </x-app-layout>
+
