@@ -21,6 +21,12 @@
                     CRUD graficador
                 </x-nav-link>
 
+                <x-nav-link :href="route('graficadores.lista')" :active="request()->routeIs('graficadores.lista')">
+                    Graficador Público
+                </x-nav-link>
+                
+                
+
             </div>
 
             <!-- Settings Dropdown -->

@@ -166,7 +166,7 @@ public function cambiarEstado($idGraficador, $id)
     }
 
     // Método para añadir colaborador
-    public function addCollaborator(Request $request)
+    /*public function addCollaborator(Request $request)
     {
 
 
@@ -186,15 +186,40 @@ public function cambiarEstado($idGraficador, $id)
 
         // Responder con un JSON
         return response()->json(['success' => $result]);
+    }*/
+    
+    public function addCollaborator(Request $request)
+    {
+        $user = auth()->user(); // Asegúrate de que el usuario esté autenticado
+    
+        // Verificar que el usuario no sea el creador del graficador
+        $graficador = DB::table('graficadorusuario')->where('IdGraficador', $request->graficadorId)->first();
+    
+        if ($graficador && $graficador->IdUser === $user->id) {
+            return response()->json(['error' => 'No puedes enviarte una invitación a ti mismo.'], 400);
+        }
+    
+        // Insertar el nuevo colaborador
+        $result = DB::table('graficadorusuario')->insert([
+            'IdGraficador' => $request->graficadorId,
+            'Contador' => 1,
+            'IdUser' => $user->id,
+            'TipoUsuario' => 2,  // Tipo de usuario colaborador
+            'Fecha' => now()->toDateString(),
+            'Hora' => now()->toTimeString(),
+            'Estado' => 1,  // Estado pendiente
+        ]);
+    
+        return response()->json(['success' => $result]);
     }
-  // Método que lista todas las gráficas
-  public function PortalGraficador()
-  {
-     
+    
 
+  // Método que lista todas las gráficas
+    public function PortalGraficador()
+    { 
       // Pasar los datos a la vista
       return view('graficadores.portalgraficador');
-  }
+    }
 
 
 }

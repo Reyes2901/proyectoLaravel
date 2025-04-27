@@ -36,19 +36,23 @@
                                     <td class="border px-4 py-2">{{ $graficador->Estado }}</td>
                                     <td class="border px-4 py-2">{{ $graficador->Contenido }}</td>
                                     <td class="border px-4 py-2">
-                                        <button
-                                            class="bg-orange-500 text-black py-2 px-4 rounded-xl hover:bg-orange-600"
-                                            onclick="openModal({{ $graficador->IdGraficador }})"
-                                        >
-                                            Invitación
-                                        </button>
-
+                                        @if ($graficador->IdUser !== auth()->user()->id)
+                                            <button
+                                                class="bg-orange-500 text-black py-2 px-4 rounded-xl hover:bg-orange-600"
+                                                onclick="openModal({{ $graficador->IdGraficador }})"
+                                            >
+                                                Invitación
+                                            </button>
+                                        @else
+                                            <span class="text-gray-500">Eres el creador</span>
+                                        @endif
                                     </td>
                                 </tr>
                             @endforeach
                         </tbody>
                     </table>
-                   <!-- Modal -->
+
+                    <!-- Modal -->
                     <div id="collaboratorModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
                         <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md mx-4">
                             <h3 class="text-2xl font-bold text-gray-800 mb-6 text-center">
@@ -103,9 +107,7 @@
             })
             .then(response => response.json())
             .then(data => {
-                
                 if (data.success) {
-
                     alert('¡Ahora eres colaborador!');
                     location.reload(); // refrescar para ver cambios
                 } else {
