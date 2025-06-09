@@ -34,4 +34,10 @@ Route::post('/graficador/colaborador', [GraficadorController::class, 'addCollabo
 Route::get('/graficador/portal', [GraficadorController::class, 'PortalGraficador']);
 
 
+// Ruta para importar
+
+Route::get('/graficador/importar', [GraficadorController::class, 'mostrarFormularioImportar'])->name('graficador.importar');
+Route::post('/graficador/procesar-imagen', [GraficadorController::class, 'procesarImagen'])->name('graficador.procesar');
+
+
 require __DIR__.'/auth.php';

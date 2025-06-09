@@ -47,7 +47,7 @@ export class CustomComponent {
             .file('component.scss', scssBlob)
             .file('component.ts', tsBlob);
 
-        // Generar el archivo ZIP y descargarlo
+        // Generar el archivo ZIP y descargar lo
         zip.generateAsync({ type: 'blob' }).then(function(content) {
             // Crear un enlace de descarga y hacer clic en él
             const zipLink = document.createElement('a');

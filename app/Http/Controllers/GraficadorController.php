@@ -1,10 +1,20 @@
 <?php
 
+
+
 namespace App\Http\Controllers;
 
 use App\Models\Graficador;
-use Illuminate\Http\Request;
+
 use Illuminate\Support\Facades\DB; // <---- Agrega esto arriba en el controlador
+use Aws\Rekognition\RekognitionClient;
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use GuzzleHttp\Client; // Solo si usas Guzzle, opcional
+use Illuminate\Support\Facades\Log;
+
+use Illuminate\Support\Facades\Http;
 
 
 class GraficadorController extends Controller
@@ -220,6 +230,97 @@ public function cambiarEstado($idGraficador, $id)
       // Pasar los datos a la vista
       return view('graficadores.portalgraficador');
     }
+    public function show($id)
+    {
+        $graficador = Graficador::findOrFail($id);
+        return view('graficadores.show', compact('graficador'));
+    }
+    
+    // Mostrar formulario para importar imagen
+
+    public function mostrarFormularioImportar()
+    {
+        return view('graficadores.importador');
+    }
+
+
+
+
+    public function procesarImagen(Request $request)
+    {
+        $request->validate([
+            'imagen' => 'required|image|max:4096',
+        ]);
+
+        $path = $request->file('imagen')->store('public/imagenes');
+        $imagePath = Storage::path($path);
+
+        $client = new RekognitionClient([
+            'version' => 'latest',
+            'region'  => config('services.rekognition.region'),
+            'credentials' => [
+                'key'    => config('services.rekognition.key'),
+                'secret' => config('services.rekognition.secret'),
+            ],
+        ]);
+
+        $imageBytes = file_get_contents($imagePath);
+
+        try {
+            $result = $client->detectLabels([
+                'Image' => [
+                    'Bytes' => $imageBytes,
+                ],
+                'MaxLabels'     => 10,
+                'MinConfidence' => 70,
+            ]);
+
+            $labels = collect($result['Labels'])
+                ->pluck('Name')
+                ->implode(', ');
+
+            $descripcion = 'Etiquetas detectadas: ' . $labels;
+            $descripcion = $this->consultarGemini($descripcion);
+
+        } catch (\Exception $e) {
+            $descripcion = 'Error al comunicarse con AWS Rekognition: ' . $e->getMessage();
+        }
+        return response($descripcion)
+        ->header('Content-Type', 'text/plain')
+        ->header('Content-Disposition', "attachment; filename=\"archivo.dart\"")
+        ->header('Content-Length', strlen($descripcion));
+
+        //return redirect()->route('graficador.importar')->with([
+        //    'descripcion' => $descripcion,
+        //    'imagen_url' => Storage::url($path)
+        //]);
+    }
+
+
+    public function consultarGemini(string $mensajeUsuario): string
+    {
+
+        $response = Http::withHeaders([
+            'Content-Type' => 'application/json',
+        ])->post('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyBYaWFDswdP_2nRRCufHEy2uf1k42Ofo8s', [
+            'contents' => [
+                [
+                    'parts' => [
+                        'text' => "Genera SOLO el código Flutter para una pantalla basada en esta descripción. No agregues explicaciones ni texto adicional. Devuélvelo en formato de código listo para copiar:\n" . $mensajeUsuario                        
+                    ]
+                ]
+            ]
+        ]);
+
+        if ($response->successful()) {
+            $data = $response->json();
+            return $data['candidates'][0]['content']['parts'][0]['text'] ?? 'Sin respuesta generada.';
+        }
+
+        return 'Error al consultar la API de Gemini: ' . $response->status();
+    }
+
 
 
 }
+
